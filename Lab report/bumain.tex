@@ -134,8 +134,8 @@ Given the term \( |\varphi_j(\vec{r_2})|^2\) can be written as \( (\varphi_j(\ve
    Using the Gaussian integral formula:  \[\int_{-\infty}^{\infty} e^{-\alpha r^2}dr = \sqrt{\frac{\pi}{\alpha}};\] we can rewrite the integral terms as : 
 
    \begin{align*}
-    \int |\varphi_j(\vec{r_2})|^2 dr                        &= \left[ c_1  \left( \frac{2\alpha_1}{\pi} \right)^{3/4} \right] ^2 \sqrt{\frac{\pi}{2\alpha_1}}  + 2 \left[ c_2 \left( \frac{2\alpha_2}{\pi} \right)^{3/4} \right] \left[ c_1  \left( \frac{2\alpha_1}{\pi} \right)^{3/4} \right] \sqrt{\frac{\pi}{\alpha_1+ \alpha_3}}\\
-    &+ 2\left[ c_3 \left( \frac{2\alpha_3}{\pi} \right)^{3/4} \right] \left[ c_1  \left( \frac{2\alpha_1}{\pi} \right)^{3/4} \right] \sqrt{\frac{\pi}{\alpha_1 + \alpha_3}} + \left[ c_2  \left( \frac{2\alpha_2}{\pi} \right)^{3/4} \right] ^2 \sqrt{\frac{\pi}{2\alpha_2}} \\ 
+    \int |\varphi_j(\vec{r_2})|^2 dr                        &= \left[ c_1  \left( \frac{2\alpha_1}{\pi} \right)^{3/4} \right] ^2 \sqrt{\frac{\pi}{2\alpha_1}}  + 2 \left[ c_2 \left( \frac{2\alpha_2}{\pi} \right)^{3/4} \right] \left[ c_1  \left( \frac{2\alpha_1}{\pi} \right)^{3/4} \right] \sqrt{\frac{\pi}{\alpha_1+ \alpha_2}}\\
+    &+ 2\left[ c_3 \left( \frac{2\alpha_3}{\pi} \right)^{3/4} \right] \left[ c_1  \left( \frac{2\alpha_1}{\pi} \right)^{3/4} \right] \sqrt{\frac{\pi}{\alpha_1 + \alpha_2}} + \left[ c_2  \left( \frac{2\alpha_2}{\pi} \right)^{3/4} \right] ^2 \sqrt{\frac{\pi}{2\alpha_2}} \\ 
     &+ \left[ c_3  \left( \frac{2\alpha_3}{\pi} \right)^{3/4} \right] ^2 \sqrt{\frac{\pi}{2\alpha_3}}  + 2 \left[ c_2 \left( \frac{2\alpha_2}{\pi} \right)^{3/4} \right] \left[ c_3  \left( \frac{2\alpha_3}{\pi} \right)^{3/4} \right] \sqrt{\frac{\pi}{\alpha_2 + \alpha_3}}  \\
    \end{align*}
 
@@ -160,180 +160,13 @@ We implement the following function to perform these calculations:
 \subsection{Treatment of the exchange potential : LDA}
 Using the LDA approximation of the exchange potential, we get:
 \begin{align*} 
-    V^{LDA}_X  &= -\frac{3}{4}(\frac{3}{\pi})^{\frac{1}{3}} \rho^{\frac{1}{3}}(r) \\
+    V^{LDA}_X  &= -(\frac{3}{\pi})^{\frac{1}{3}} \varphi^{\frac{1}{3}}(r) \\
+    V^{LDA}_X   &= -(\frac{3}{\pi})\sum_{j}^{occ}|\varphi_j(r)|^2 \\
 \end{align*}
-Here we choose to treat $\rho$ as constant average, we use the formula $\varphi = N/V$. where N
-is the the number of electron and V is the approximated volume calculated using the formula $V = \sum_{A}V_{total} -V_{overlap}$.
-In turn, $V= \frac{4}{3} \pi R^3_{vdw}$ and for $V_{overlap}$, $R = d_{bond}/2$. The corresponding c++ code is straight forward
 
-\begin{lstlisting}
-    
-    double y_volumes(double rs[]){
-        double solution = 0;
-        for (int i=0; i < sizeof(rs); i++){
-            solution = solution + (4/3)*M_1_PI*(rs[i])^3
-        }
-        return solution;
-         }
-    
-    double y_exchange_potential(double av_density){
-    return -(3/4)*((3/M_1_PI)^(1/3))*(av_density^(1/3))
-            }
-\end{lstlisting}
 
-\subsection{Treatment of the nuclear attraction term}
-The nuclear attraction term is given by the formula:
-\[V_{nuclear} = -\sum_{A}^{M}\frac{Z_A}{r_{1A}}.\] 
 
-Given that the density is constant, the average electron-nucleus distance is $(3/4)R$. R being the van der Waals radius.
 
-\section{KS equation of CO2}
- What make DFT related calculation complex is the complexity of implementation. This is why using an actual molecule like CO2 as a prototype is very usefull.  Here, we use less sofisticated methods like 
- molecular mechanics to get inter nucleus distances. We find C=O bonds to be 1.1970 Armstrong.
-
- \subsection{Treatment of $\alpha$ and $c$}
-
- Using reliable sources like https://www.basissetexchange.org, we get the $\alpha$ and $c$ parameters for each atom.
  
- \begin{lstlisting}
 
-
-!----------------------------------------------------------------------
-! Basis Set Exchange
-! Version 0.11
-! https://www.basissetexchange.org
-!----------------------------------------------------------------------
-!   Basis set: STO-3G
-! Description: STO-3G Minimal Basis (3 functions/AO)
-!        Role: orbital
-!     Version: 1  (Data from Gaussian09)
-!----------------------------------------------------------------------
-
-
-C     0
-S    3   1.00
-      0.7161683735D+02       0.1543289673D+00
-      0.1304509632D+02       0.5353281423D+00
-      0.3530512160D+01       0.4446345422D+00
-SP   3   1.00
-      0.2941249355D+01      -0.9996722919D-01       0.1559162750D+00
-      0.6834830964D+00       0.3995128261D+00       0.6076837186D+00
-      0.2222899159D+00       0.7001154689D+00       0.3919573931D+00
-****
-O     0
-S    3   1.00
-      0.1307093214D+03       0.1543289673D+00
-      0.2380886605D+02       0.5353281423D+00
-      0.6443608313D+01       0.4446345422D+00
-SP   3   1.00
-      0.5033151319D+01      -0.9996722919D-01       0.1559162750D+00
-      0.1169596125D+01       0.3995128261D+00       0.6076837186D+00
-      0.3803889600D+00       0.7001154689D+00       0.3919573931D+00
-****
-
- \end{lstlisting}
-
-We can now start computing the Laplacian matrix. As illustrated in the code below:
-\begin{lstlisting}
-    
-//guassian exponent values for carbon
-double c_a1 = 71.61683735;
-double c_a2 = 13.04509632;
-double c_a3 = 3.53051216;
-
-//contraction coefficient values for carbon
-double c_c1 = 0.1543289673;
-double c_c2 = 0.5353281423;
-double c_c3 = 0.4446345422;
-
-//guassian integral values for oxigen
-double o_a1 = 130.7093200;
-double o_a2 = 23.80886605;
-double o_a3 = 6.443608313;
-
-//contraction coefficient values for oxigen
-double o_c1 = 0.1543289673;
-double o_c2 = 0.5353281423;
-double o_c3 = 0.4446345422;
-
-//Laplacian matrix element values for carbon
-c_Lap_1 = y_feta(-1, c_a1)*y_gaussian_integral(c_a1, c_a1);
-c_Lap_2 = y_feta(-1, c_a2)*y_gaussian_integral(c_a2, c_a2);
-c_Lap_3 = y_feta(-1, c_a3)*y_gaussian_integral(c_a3, c_a3);
-
-\end{lstlisting}
-\subsection{Computing the electron repulsion term}
-We now compute the electron repulsion term. We use the following code to do so:
-
-\begin{lstlisting}
-//construct the QC
-double QC = (((y_feta(c_c1, c_a1))^2)*
-            y_gaussian_integral(c_a1,c_a1) )+
-            (2*y_feta(c_c2, c_a2)*y_feta(c_c1, c_a1))*
-            y_gaussian_integral(c_a2,c_a1)+
-            (2*y_feta(c_c3, c_a3)*y_feta(c_c1, c_a1))*
-            y_gaussian_integral(c_a3,c_a1)+
-            (((y_feta(c_c2, c_a2))^2)*
-            y_gaussian_integral(c_a2,c_a2))+
-            (((y_feta(c_c3, c_a3))^2)*
-            y_gaussian_integral(c_a3,c_a3))+
-            (2*y_feta(c_c2, c_a2)*y_feta(c_c3, c_a3))*
-            y_gaussian_integral(c_a2,c_a3);
-
-//construct the QO
-double QO = (((y_feta(o_c1, o_a1))^2)*
-            y_gaussian_integral(o_a1,o_a1) )+
-            (2*y_feta(o_c2, o_a2)*y_feta(o_c1, o_a1))*
-            y_gaussian_integral(o_a2,o_a1)+
-            (2*y_feta(o_c3, o_a3)*y_feta(o_c1, o_a1))*
-            y_gaussian_integral(o_a3,o_a1)+
-            (((y_feta(o_c2, o_a2))^2)*
-            y_gaussian_integral(o_a2,o_a2))+
-            (((y_feta(o_c3, o_a3))^2)*
-            y_gaussian_integral(o_a3,o_a3))+
-            (2*y_feta(o_c2, o_a2)*y_feta(o_c3, o_a3))*
-            y_gaussian_integral(o_a2,o_a3);
-double ROC =2.2620020083;
-double coulomb_interaction = y_coulomb_interaction(QC, QO, ROC);
-\end{lstlisting}
-
-\subsection{Computing the exchange potential}
-We now compute the exchange potential. We use the following code to do so:
-\begin{lstlisting}
-//bhor radius of the 3 atoms
-double rs[] = {3.2125341806,2.8723835026,3.2125341806};
-
-double r_s[] = {0.340150678,0.340150678};
-
-//calculate volume of the system
-
-//overall volume of the system
-double volume_total = y_volumes(rs);
-
-//correction volume 
-double volume_correction = y_volumes(r_s);
-
-double volume = volume_total - volume_correction;
-
-//calculate the density of the system
-double density = (6+8+8)/volume;
-
-//calculate the exchange potential
-double exchange_potential = y_exchange_potential(density);
-
-\end{lstlisting}
-
-\section{nuclear attraction term}
-We now compute the nuclear attraction term. We use the following code to do so:
-\begin{lstlisting}
-    //calculate the exchange potential
-    double exchange_potential = y_exchange_potential(density);
-    
-    //ccalculate the nuclear attraction term
-    
-    double r1c = (3/4)*3.2125341806;
-    double r1o = (3/4)*2.8723835026;
-    
-    double ena_potential = 2*(ena(6,r1c)) + ena(8,r1o);
-\end{lstlisting}
 \end{document}
